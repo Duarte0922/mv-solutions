@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+```
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MV Solutions - Orçamentos</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+```
+
+</head>
+
+<body>
+
+<header class="topo">
+
+```
+<div class="logo-area">
+
+    <img src="assets/logo.jpeg">
+
+    <div>
+
+        <h1>MV Solutions</h1>
+
+        <p>Soluções Inteligentes para o seu Empreendimento</p>
+
+        <div class="contatos">
+
+            <span>
+                <i class="fa-brands fa-whatsapp"></i>
+                (31) 98827-5579
+            </span>
+
+            <span>
+                <i class="fa-solid fa-envelope"></i>
+                marcellocalhas@hotmail.com
+            </span>
+
+            <span>
+                <i class="fa-brands fa-instagram"></i>
+                @marcellosolucoes
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</header>
+
+<main>
+
+```
+<section class="card">
+
+    <h2>Novo Orçamento / Pedido</h2>
+
+    <div class="linha">
+
+        <div class="campo">
+            <label>Cliente</label>
+            <input type="text" id="cliente">
+        </div>
+
+        <div class="campo">
+            <label>Telefone</label>
+            <input type="text" id="telefone">
+        </div>
+
+    </div>
+
+    <div class="linha">
+
+        <div class="campo">
+            <label>Endereço</label>
+            <input type="text" id="endereco">
+        </div>
+
+        <div class="campo">
+            <label>Cidade</label>
+            <input type="text" id="cidade" value="Belo Horizonte">
+        </div>
+
+    </div>
+
+    <div class="linha">
+
+        <div class="campo">
+            <label>Data</label>
+            <input type="date" id="data">
+        </div>
+
+        <div class="campo">
+
+            <label>Tipo</label>
+
+            <select id="tipo">
+                <option>Orçamento</option>
+                <option>Pedido</option>
+            </select>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="card">
+
+    <h2>Itens do Serviço</h2>
+
+    <table id="tabelaItens">
+
+        <thead>
+
+            <tr>
+                <th>Qtd</th>
+                <th>Descrição</th>
+                <th>Valor Unitário</th>
+                <th>Total</th>
+                <th>Ação</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="itens">
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <button id="btnAdicionar">
+        + Adicionar Item
+    </button>
+
+</section>
+
+<section class="card">
+
+    <h2>Pagamento</h2>
+
+    <div class="linha">
+
+        <div class="campo">
+            <label>Entrada</label>
+            <input type="text" id="entrada">
+        </div>
+
+        <div class="campo">
+            <label>Forma de Pagamento</label>
+            <input type="text" id="pagamento">
+        </div>
+
+    </div>
+
+    <div class="campo">
+
+        <label>Observações</label>
+
+        <textarea id="observacoes"></textarea>
+
+    </div>
+
+</section>
+
+<section class="card total-box">
+
+    <h2>Total Geral</h2>
+
+    <h1 id="totalGeral">
+        R$ 0,00
+    </h1>
+
+    <div class="acoes">
+
+        <button id="salvarPedido">
+            Salvar Pedido
+        </button>
+
+        <button id="gerarPDF">
+            Gerar PDF
+        </button>
+
+        <button id="enviarWhats">
+            WhatsApp
+        </button>
+
+    </div>
+
+</section>
+
+<section class="card">
+
+    <h2>Histórico de Pedidos</h2>
+
+    <input
+        type="text"
+        placeholder="Pesquisar cliente..."
+        id="pesquisa">
+
+    <br><br>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Nº</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Total</th>
+                <th>Ações</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="historico">
+
+        </tbody>
+
+    </table>
+
+</section>
+```
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="js/app.js"></script>
+
+<script src="js/pdf.js"></script>
+
+</body>
+</html>
