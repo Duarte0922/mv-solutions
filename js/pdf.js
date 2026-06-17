@@ -2,7 +2,7 @@
 window.jsPDF = window.jspdf.jsPDF;
 
 // Link direto e seguro da logo para carregar direto no GitHub Pages ou Localmente
-const LOGO_URL = "https://duarte0922.github.io/mv-solutions/assets/logo.png";
+const LOGO_URL = "https://duarte0922.github.io/mv-solutions/assets/logo.jpeg";
 
 // ESCUTADOR DO BOTÃO GERAR PDF DA TELA PRINCIPAL
 document.getElementById("gerarPDF").addEventListener("click", () => {
