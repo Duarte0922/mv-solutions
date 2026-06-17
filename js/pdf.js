@@ -1,6 +1,9 @@
 // Garante o carregamento correto do jsPDF
 window.jsPDF = window.jspdf.jsPDF;
 
+// Link direto e seguro da logo para carregar direto no GitHub Pages ou Localmente
+const LOGO_URL = "https://duarte0922.github.io/mv-solutions/assets/logo.png";
+
 // ESCUTADOR DO BOTÃO GERAR PDF DA TELA PRINCIPAL
 document.getElementById("gerarPDF").addEventListener("click", () => {
     const dados = {
@@ -34,51 +37,111 @@ document.getElementById("gerarPDF").addEventListener("click", () => {
         return;
     }
 
-    gerarDocumentoPDF(dados);
+    // Chama a função unificada passando true para baixar direto
+    gerarDocumentoPDF(dados, true);
 });
 
-// FUNÇÃO ESTRUTURAL QUE DESENHA O PDF
-function gerarDocumentoPDF(pedido) {
+// FUNÇÃO PARA ABRIR E REGERAR O PDF DIRETO DO HISTÓRICO
+async function visualizarPedidoPdf(idDocumento) {
+    try {
+        const docSnap = await db.collection("pedidos").doc(idDocumento).get();
+        if (!docSnap.exists) { alert("Pedido não encontrado."); return; }
+        const pedido = docSnap.data();
+
+        // Adapta os campos do Firebase para bater com a estrutura da função de desenho
+        const dadosPedido = {
+            numero: pedido.numero || '---',
+            cliente: pedido.cliente || '---',
+            telefone: pedido.telefone || '---',
+            endereco: pedido.endereco || '---',
+            cidade: pedido.cidade || '',
+            data: pedido.data || '---',
+            tipo: pedido.tipo || 'Orçamento',
+            entrada: pedido.entrada || 'R$ 0,00',
+            formaPagamento: pedido.formaPagamento || '---',
+            observacoes: pedido.observacoes || '',
+            total: pedido.total || 'R$ 0,00',
+            itens: pedido.itens || []
+        };
+
+        // Chama a função unificada passando false para abrir em nova aba
+        gerarDocumentoPDF(dadosPedido, false);
+
+    } catch (error) {
+        console.error("Erro geral no PDF do histórico:", error);
+        alert("Erro ao recuperar arquivo do histórico.");
+    }
+}
+
+// 🛠️ FUNÇÃO ÚNICA ESTRUTURAL QUE DESENHA O LAYOUT DO PDF (Com Logo)
+function gerarDocumentoPDF(pedido, baixarDireto = true) {
     const doc = new jsPDF();
 
-    // Cabeçalho da Empresa
+    // Cria o elemento de imagem em memória para carregar o arquivo da pasta assets
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // Evita bloqueios de segurança do navegador
+    img.src = LOGO_URL;
+
+    // Aguarda a imagem carregar antes de montar o PDF
+    img.onload = function() {
+        desenharConteudo(doc, img, pedido, baixarDireto);
+    };
+
+    img.onerror = function() {
+        console.log("Não foi possível carregar a logo pelo link, gerando sem imagem...");
+        desenharConteudo(doc, null, pedido, baixarDireto);
+    };
+}
+
+// Desenha elementos, textos e tabelas dentro do documento
+function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
+    let inicioTextoX = 14;
+
+    // Se a imagem carregou com sucesso, renderiza ela e joga o texto do cabeçalho pro lado
+    if (imgElement) {
+        // addImage(imagem, formato, x, y, largura, altura)
+        doc.addImage(imgElement, 'PNG', 14, 15, 38, 30);
+        inicioTextoX = 58; // Desloca os textos para não ficar em cima da imagem
+    }
+
+    // Cabeçalho da Empresa (Alinhado)
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(22);
-    doc.text("MV SOLUTIONS", 14, 25);
+    doc.text("MV SOLUTIONS", inicioTextoX, 25);
     
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(10);
-    doc.text("Soluções Inteligentes para o seu Empreendimento", 14, 32);
-    doc.text("WhatsApp: (31) 98827-5579 | marcellocalhas@hotmail.com", 14, 38);
-    doc.text("Instagram: @marcellosolucoes", 14, 44);
+    doc.text("Soluções Inteligentes para o seu Empreendimento", inicioTextoX, 32);
+    doc.text("WhatsApp: (31) 98827-5579 | marcellocalhas@hotmail.com", inicioTextoX, 38);
+    doc.text("Instagram: @marcellosolucoes", inicioTextoX, 44);
 
     // Linha divisória
     doc.setLineWidth(0.5);
-    doc.line(14, 48, 196, 48);
+    doc.line(14, 49, 196, 49);
 
     // Título do Documento
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(16);
-    doc.text(`${pedido.tipo.toUpperCase()} N° ${pedido.numero}`, 14, 58);
+    doc.text(`${pedido.tipo.toUpperCase()} N° ${pedido.numero}`, 14, 59);
 
     // Dados do Cliente
     doc.setFontSize(11);
-    doc.text("DADOS DO CLIENTE", 14, 68);
+    doc.text("DADOS DO CLIENTE", 14, 69);
     doc.setFont("Helvetica", "normal");
-    doc.text(`Cliente: ${pedido.cliente || '---'}`, 14, 75);
-    doc.text(`Telefone: ${pedido.telefone || '---'}`, 14, 81);
-    doc.text(`Endereço: ${pedido.endereco || '---'} - ${pedido.cidade || ''}`, 14, 87);
-    doc.text(`Data: ${pedido.data || '---'}`, 14, 93);
+    doc.text(`Cliente: ${pedido.cliente}`, 14, 76);
+    doc.text(`Telefone: ${pedido.telefone}`, 14, 82);
+    doc.text(`Endereço: ${pedido.endereco} - ${pedido.cidade}`, 14, 88);
+    doc.text(`Data: ${pedido.data}`, 14, 94);
 
     // Linha divisória antes dos Itens
-    doc.line(14, 98, 196, 98);
+    doc.line(14, 99, 196, 99);
 
     // Itens
     doc.setFont("Helvetica", "bold");
-    doc.text("ITENS DO SERVIÇO", 14, 105);
+    doc.text("ITENS DO SERVIÇO", 14, 106);
     
     doc.setFont("Helvetica", "normal");
-    let linhaAtual = 113;
+    let linhaAtual = 114;
 
     pedido.itens.forEach((item) => {
         doc.text(`${item.qtd}x   ${item.descricao}`, 14, linhaAtual);
@@ -96,8 +159,8 @@ function gerarDocumentoPDF(pedido) {
     
     linhaAtual += 8;
     doc.setFont("Helvetica", "normal");
-    doc.text(`Entrada: ${pedido.entrada || 'R$ 0,00'}`, 14, linhaAtual);
-    doc.text(`Forma de Pagamento: ${pedido.formaPagamento || '---'}`, 100, linhaAtual);
+    doc.text(`Entrada: ${pedido.entrada}`, 14, linhaAtual);
+    doc.text(`Forma de Pagamento: ${pedido.formaPagamento}`, 100, linhaAtual);
     
     if (pedido.observacoes) {
         linhaAtual += 8;
@@ -108,21 +171,10 @@ function gerarDocumentoPDF(pedido) {
     doc.line(50, 260, 160, 260);
     doc.text("Assinatura do Cliente", 105, 266, { align: "center" });
 
-    // Baixa o arquivo automaticamente
-    doc.save(`${pedido.tipo}_${pedido.cliente}.pdf`);
-}
-
-// FUNÇÃO PARA ABRIR E REGERAR O PDF DIRETO DO HISTÓRICO
-async function visualizarPedidoPdf(idDocumento) {
-    try {
-        const docRef = await db.collection("pedidos").doc(idDocumento).get();
-        if (docRef.exists) {
-            const pedidoDados = docRef.data();
-            gerarDocumentoPDF(pedidoDados);
-        } else {
-            alert("Pedido não encontrado no banco.");
-        }
-    } catch (error) {
-        alert("Erro ao carregar dados do PDF.");
+    // Decide se faz o download automático ou se abre na tela
+    if (baixarDireto) {
+        doc.save(`${pedido.tipo}_${pedido.cliente}.pdf`);
+    } else {
+        window.open(doc.output('bloburl'), '_blank');
     }
 }
