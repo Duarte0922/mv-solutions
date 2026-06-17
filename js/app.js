@@ -162,37 +162,41 @@ async function salvarPedido() {
 }
 
 // 2. CARREGAR HISTÓRICO EM TEMPO REAL OU CACHE DE TODOS OS PEDIDOS
+// CARREGAR HISTÓRICO DA NUVEM (Com botão de abrir PDF integrado)
 function carregarHistorico() {
     const historico = document.getElementById("historico");
     historico.innerHTML = "";
-
-    // Puxa os dados ordenados por criação (mais recentes primeiro)
     db.collection("pedidos").orderBy("criadoEm", "desc").get().then((snapshot) => {
         snapshot.forEach((doc) => {
             const pedido = doc.data();
             const tr = document.createElement("tr");
-
             tr.innerHTML = `
                 <td>${pedido.numero || '---'}</td>
                 <td>${pedido.cliente}</td>
-                <td>${pedido.data || '---'}</td>
+                <td>${pedido.data}</td>
                 <td>${pedido.total}</td>
                 <td>
-                    <button class="btn-excluir" data-id="${doc.id}" style="background-color: #ff4d4d; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 4px;">
+                    <button class="btn-pdf" data-id="${doc.id}" style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;margin-right:5px;">
+                        Ver PDF
+                    </button>
+                    <button class="btn-excluir" data-id="${doc.id}" style="background:#ff4d4d;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
                         Excluir
                     </button>
                 </td>
             `;
 
-            // Atribui o evento de exclusão mapeando o ID único gerado pelo Firebase
+            // Ação do Botão Ver PDF (Chama a função criada no pdf.js)
+            tr.querySelector(".btn-pdf").addEventListener("click", function() {
+                visualizarPedidoPdf(this.getAttribute("data-id"));
+            });
+
+            // Ação do Botão Excluir
             tr.querySelector(".btn-excluir").addEventListener("click", function() {
                 excluirPedido(this.getAttribute("data-id"));
             });
 
             historico.appendChild(tr);
         });
-    }).catch(error => {
-        console.error("Erro ao buscar histórico:", error);
     });
 }
 
