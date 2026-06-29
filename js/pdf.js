@@ -96,6 +96,7 @@ function gerarDocumentoPDF(pedido, baixarDireto = true) {
 // Desenha elementos, textos e tabelas dentro do documento
 function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
     let inicioTextoX = 14;
+    const larguraPagina = 196; // Largura útil da página A4
 
     // Se a imagem carregou com sucesso, renderiza ela e joga o texto do cabeçalho pro lado
     if (imgElement) {
@@ -126,45 +127,76 @@ function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
 
     // Dados do Cliente
     doc.setFontSize(11);
+    doc.setFont("Helvetica", "bold");
     doc.text("DADOS DO CLIENTE", 14, 69);
     doc.setFont("Helvetica", "normal");
-    doc.text(`Cliente: ${pedido.cliente}`, 14, 76);
-    doc.text(`Telefone: ${pedido.telefone}`, 14, 82);
-    doc.text(`Endereço: ${pedido.endereco} - ${pedido.cidade}`, 14, 88);
-    doc.text(`Data: ${pedido.data}`, 14, 94);
+    
+    // Quebra de linha automática para textos longos
+    let linhaAtual = 76;
+    const espacamento = 6;
+    
+    doc.text(`Cliente: ${pedido.cliente}`, 14, linhaAtual);
+    linhaAtual += espacamento;
+    
+    doc.text(`Telefone: ${pedido.telefone}`, 14, linhaAtual);
+    linhaAtual += espacamento;
+    
+    // Endereço com quebra de linha automática
+    const enderecoCompleto = `Endereço: ${pedido.endereco} - ${pedido.cidade}`;
+    const enderecoLinhas = doc.splitTextToSize(enderecoCompleto, larguraPagina - 14);
+    doc.text(enderecoLinhas, 14, linhaAtual);
+    linhaAtual += espacamento * enderecoLinhas.length;
+    
+    doc.text(`Data: ${pedido.data}`, 14, linhaAtual);
+    linhaAtual += espacamento + 4;
 
     // Linha divisória antes dos Itens
-    doc.line(14, 99, 196, 99);
+    doc.line(14, linhaAtual, 196, linhaAtual);
+    linhaAtual += 7;
 
     // Itens
     doc.setFont("Helvetica", "bold");
-    doc.text("ITENS DO SERVIÇO", 14, 106);
+    doc.text("ITENS DO SERVIÇO", 14, linhaAtual);
+    linhaAtual += 8;
     
     doc.setFont("Helvetica", "normal");
-    let linhaAtual = 114;
 
     pedido.itens.forEach((item) => {
-        doc.text(`${item.qtd}x   ${item.descricao}`, 14, linhaAtual);
-        doc.text(`${item.totalItem}`, 170, linhaAtual, { align: "right" });
-        linhaAtual += 8;
+        // Quebra a descrição se for muito longa
+        const descricaoCompleta = `${item.qtd}x ${item.descricao}`;
+        const descricaoLinhas = doc.splitTextToSize(descricaoCompleta, 140); // 140px de largura máxima
+        
+        // Desenha a descrição (pode ter múltiplas linhas)
+        doc.text(descricaoLinhas, 14, linhaAtual);
+        
+        // Desenha o valor total alinhado à direita (na primeira linha do item)
+        doc.text(`${item.totalItem}`, 190, linhaAtual, { align: "right" });
+        
+        // Incrementa a linha baseado no número de linhas da descrição
+        linhaAtual += 7 * descricaoLinhas.length;
     });
 
     // Linha divisória antes do Total
     doc.line(14, linhaAtual + 2, 196, linhaAtual + 2);
-    linhaAtual += 10;
+    linhaAtual += 12;
 
     // Bloco de Fechamento e Valores
     doc.setFont("Helvetica", "bold");
+    doc.setFontSize(13);
     doc.text(`TOTAL GERAL: ${pedido.total}`, 14, linhaAtual);
     
     linhaAtual += 8;
     doc.setFont("Helvetica", "normal");
+    doc.setFontSize(11);
     doc.text(`Entrada: ${pedido.entrada}`, 14, linhaAtual);
     doc.text(`Forma de Pagamento: ${pedido.formaPagamento}`, 100, linhaAtual);
     
     if (pedido.observacoes) {
         linhaAtual += 8;
-        doc.text(`Observações: ${pedido.observacoes}`, 14, linhaAtual);
+        // Quebra automática para observações longas
+        const obsLinhas = doc.splitTextToSize(`Observações: ${pedido.observacoes}`, larguraPagina - 14);
+        doc.text(obsLinhas, 14, linhaAtual);
+        linhaAtual += 6 * obsLinhas.length;
     }
 
     // Campo de Assinatura no rodapé
