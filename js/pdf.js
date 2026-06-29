@@ -96,9 +96,9 @@ function gerarDocumentoPDF(pedido, baixarDireto = true) {
 // Desenha elementos, textos e tabelas dentro do documento
 function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
     let inicioTextoX = 14;
-    const larguraPagina = 196; // Largura útil da página A4
+    const larguraPagina = 196;
     const margemEsquerda = 14;
-    const espacamento = 7; // Espaçamento padrão entre linhas
+    const espacamento = 7;
 
     // Se a imagem carregou com sucesso, renderiza ela e joga o texto do cabeçalho pro lado
     if (imgElement) {
@@ -167,7 +167,6 @@ function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
     doc.setFont("Helvetica", "normal");
 
     pedido.itens.forEach((item) => {
-        // Quebra a descrição se for muito longa
         const descricaoCompleta = `${item.qtd}x ${item.descricao}`;
         const descricaoLinhas = doc.splitTextToSize(descricaoCompleta, 140);
         
@@ -191,23 +190,23 @@ function desenharConteudo(doc, imgElement, pedido, baixarDireto) {
     doc.text(`TOTAL GERAL: ${pedido.total}`, 14, linhaAtual + 5);
     
     doc.setTextColor(0, 0, 0);
-    linhaAtual += 18;
+    linhaAtual += 20; // Mais espaço após o total
     
-    // Informações de Pagamento COM QUEBRA DE LINHA
+    // Informações de Pagamento COM QUEBRA DE LINHA SEPARADA
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(11);
     
-    // Entrada com quebra de linha automática
+    // Entrada - linha separada com mais espaço
     const entradaTexto = `Entrada: ${pedido.entrada}`;
     const entradaLinhas = doc.splitTextToSize(entradaTexto, larguraPagina - 14);
     doc.text(entradaLinhas, 14, linhaAtual);
-    linhaAtual += espacamento * entradaLinhas.length;
+    linhaAtual += espacamento * entradaLinhas.length + 3; // +3 para dar mais respiro
     
-    // Forma de Pagamento com quebra de linha automática
+    // Forma de Pagamento - linha separada abaixo
     const pagamentoTexto = `Restante: ${pedido.formaPagamento}`;
     const pagamentoLinhas = doc.splitTextToSize(pagamentoTexto, larguraPagina - 14);
     doc.text(pagamentoLinhas, 14, linhaAtual);
-    linhaAtual += espacamento * pagamentoLinhas.length;
+    linhaAtual += espacamento * pagamentoLinhas.length + 3;
     
     // Observações com quebra de linha automática
     if (pedido.observacoes) {
