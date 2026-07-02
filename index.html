@@ -34,8 +34,27 @@
 </header>
 
 <main>
-    <section class="card">
-        <h2>Novo Orçamento / Pedido</h2>
+<section class="card">
+        <!-- Contêiner do Título e dos Novos Botões Alternadores -->
+        <div class="cabecalho-bloco" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px;">
+            <h2 style="margin: 0;">Novo Documento</h2>
+            
+            <div class="alternador-tipo" style="display: flex; gap: 10px;">
+                <button type="button" id="btnTipoOrcamento" class="btn-tipo ativo" style="padding: 10px 25px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; background-color: #12263a; color: white; border: 1px solid #007bff;">
+                    Orçamento
+                </button>
+                <button type="button" id="btnTipoPedido" class="btn-tipo" style="padding: 10px 25px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; background-color: #1e293b; color: #94a3b8;">
+                    Pedido
+                </button>
+                <button type="button" id="btnTipoRecibo" class="btn-tipo" style="padding: 10px 25px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; background-color: #1e293b; color: #94a3b8;">
+                    Recibo
+                </button>
+            </div>
+        </div>
+
+        <!-- Input invisível para o sistema continuar salvando o tipo sem quebrar nada antigo -->
+        <input type="hidden" id="tipo" value="Orçamento">
+
         <div class="linha">
             <div class="campo">
                 <label>Cliente</label>
@@ -51,26 +70,16 @@
                 <label>Endereço</label>
                 <input type="text" id="endereco">
             </div>
-            <div class="campo">
+            <div class="campo text-box-cidade">
                 <label>Cidade</label>
                 <input type="text" id="cidade" value="Belo Horizonte">
             </div>
-        </div>
-        <div class="linha">
-            <div class="campo">
+            <div class="campo text-box-data">
                 <label>Data</label>
                 <input type="date" id="data">
             </div>
-            <div class="campo">
-                <label>Tipo</label>
-                <select id="tipo">
-                    <option>Orçamento</option>
-                    <option>Pedido</option>
-                </select>
-            </div>
         </div>
     </section>
-
     <section class="card">
         <h2>Itens do Serviço</h2>
         <table id="tabelaItens">
@@ -110,7 +119,8 @@
         </div>
     </section>
 
-<section class="card total-box">
+    <!-- ESSA SEÇÃO TINHA SUMIDO DA SUA TELA POR ERRO DE SCRIPT -->
+    <section class="card total-box">
         <h2>Total Geral</h2>
         <h1 id="totalGeral">
             R$ 0,00
@@ -134,6 +144,7 @@
         </div>
     </section>
 
+    <!-- HISTÓRICO QUE TAMBÉM TINHA SUMIDO -->
     <section class="card">
         <h2>Histórico de Pedidos</h2>
         <input
@@ -157,10 +168,13 @@
     </section>
 </main>
 
+<!-- IMPRESCINDÍVEL: Bibliotecas carregadas estritamente nesta ordem no final do body -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
+<!-- Seus scripts locais -->
 <script src="js/app.js"></script>
 <script src="js/pdf.js"></script>
 
