@@ -259,3 +259,39 @@ async function excluirPedido(idDocumento) {
         carregarHistorico();
     }
 }
+// ENVIAR ORÇAMENTO/PEDIDO PELO WHATSAPP
+document.getElementById("enviarWhats").addEventListener("click", () => {
+    const cliente = document.getElementById("cliente").value;
+    const telefoneRaw = document.getElementById("telefone").value.replace(/\D/g, ""); // só números
+    const tipo = document.getElementById("tipo").value;
+    const data = document.getElementById("data").value;
+    const total = totalGeral.innerText;
+    const itens = obterItensDoFormulario();
+
+    if (!cliente) {
+        alert("Informe o cliente antes de enviar.");
+        return;
+    }
+    if (itens.length === 0) {
+        alert("Adicione ao menos um item antes de enviar.");
+        return;
+    }
+
+    let mensagem = `Olá ${cliente}! Segue seu ${tipo}${data ? " (" + data + ")" : ""} - MV Solutions:\n\n`;
+    itens.forEach(item => {
+        mensagem += `• ${item.qtd}x ${item.descricao} - ${item.totalItem}\n`;
+    });
+    mensagem += `\n*Total: ${total}*`;
+
+    let link;
+    if (telefoneRaw) {
+        // Se o cliente tiver telefone salvo, adiciona o 55 se faltar e manda direto pra ele
+        const numeroCompleto = telefoneRaw.length <= 11 ? `55${telefoneRaw}` : telefoneRaw;
+        link = `https://wa.me/${numeroCompleto}?text=${encodeURIComponent(mensagem)}`;
+    } else {
+        // Sem telefone: abre o WhatsApp Web/App pra você escolher o contato
+        link = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+    }
+
+    window.open(link, "_blank");
+});
