@@ -204,48 +204,78 @@ async function carregarPedidoParaEdicao(idDocumento) {
     }
 }
 
+// GUARDA OS PEDIDOS CARREGADOS PARA PERMITIR FILTRO LOCAL (SEM CONSULTAR O FIREBASE A CADA LETRA)
+let listaPedidosCache = [];
+
 // BUSCAR HISTÓRICO ATUALIZADO
 function carregarHistorico() {
     const historico = document.getElementById("historico");
     if (!historico) return;
-    historico.innerHTML = "";
-    
+
     db.collection("pedidos").orderBy("criadoEm", "desc").get().then((snapshot) => {
+        listaPedidosCache = [];
         snapshot.forEach((doc) => {
-            const pedido = doc.data();
-            const tr = document.createElement("tr");
-            tr.style.cursor = "pointer";
-            
-            tr.innerHTML = `
-                <td class="col-clicavel">${pedido.numero || '---'}</td>
-                <td class="col-clicavel"><strong>${pedido.cliente}</strong></td>
-                <td class="col-clicavel">${pedido.data}</td>
-                <td class="col-clicavel">${pedido.total}</td>
-                <td>
-                    <button class="btn-pdf" data-id="${doc.id}" style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;margin-right:5px;">Ver PDF</button>
-                    <button class="btn-excluir" data-id="${doc.id}" style="background:#ff4d4d;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Excluir</button>
-                </td>
-            `;
-
-            tr.querySelectorAll(".col-clicavel").forEach(td => {
-                td.addEventListener("click", () => carregarPedidoParaEdicao(doc.id));
-            });
-
-            tr.querySelector(".btn-pdf").addEventListener("click", (e) => {
-                e.stopPropagation();
-                if(typeof visualizarPedidoPdf === "function") {
-                    visualizarPedidoPdf(doc.id);
-                }
-            });
-            tr.querySelector(".btn-excluir").addEventListener("click", (e) => {
-                e.stopPropagation();
-                excluirPedido(doc.id);
-            });
-
-            historico.appendChild(tr);
+            listaPedidosCache.push({ id: doc.id, ...doc.data() });
         });
+        renderHistorico(listaPedidosCache);
     }).catch(err => {
         console.log("Erro ao carregar histórico:", err);
+    });
+}
+
+// DESENHA A LISTA (COMPLETA OU FILTRADA) NA TABELA
+function renderHistorico(lista) {
+    const historico = document.getElementById("historico");
+    if (!historico) return;
+    historico.innerHTML = "";
+
+    lista.forEach((pedido) => {
+        const tr = document.createElement("tr");
+        tr.style.cursor = "pointer";
+
+        tr.innerHTML = `
+            <td class="col-clicavel">${pedido.numero || '---'}</td>
+            <td class="col-clicavel"><strong>${pedido.cliente}</strong></td>
+            <td class="col-clicavel">${pedido.data}</td>
+            <td class="col-clicavel">${pedido.total}</td>
+            <td>
+                <button class="btn-pdf" data-id="${pedido.id}" style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;margin-right:5px;">Ver PDF</button>
+                <button class="btn-excluir" data-id="${pedido.id}" style="background:#ff4d4d;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Excluir</button>
+            </td>
+        `;
+
+        tr.querySelectorAll(".col-clicavel").forEach(td => {
+            td.addEventListener("click", () => carregarPedidoParaEdicao(pedido.id));
+        });
+
+        tr.querySelector(".btn-pdf").addEventListener("click", (e) => {
+            e.stopPropagation();
+            if(typeof visualizarPedidoPdf === "function") {
+                visualizarPedidoPdf(pedido.id);
+            }
+        });
+        tr.querySelector(".btn-excluir").addEventListener("click", (e) => {
+            e.stopPropagation();
+            excluirPedido(pedido.id);
+        });
+
+        historico.appendChild(tr);
+    });
+}
+
+// FILTRA A LISTA CONFORME O USUÁRIO DIGITA NO CAMPO DE PESQUISA
+const inputPesquisa = document.getElementById("pesquisa");
+if (inputPesquisa) {
+    inputPesquisa.addEventListener("input", () => {
+        const termo = inputPesquisa.value.trim().toLowerCase();
+        if (!termo) {
+            renderHistorico(listaPedidosCache);
+            return;
+        }
+        const filtrados = listaPedidosCache.filter(p =>
+            (p.cliente || "").toLowerCase().includes(termo)
+        );
+        renderHistorico(filtrados);
     });
 }
 
